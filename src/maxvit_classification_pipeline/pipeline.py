@@ -27,7 +27,7 @@ from PIL import Image
 from .data import validate_dataset
 
 MODEL_ID = "timm/maxvit_tiny_tf_224.in1k"
-MODEL_REVISION = "unpinned"
+MODEL_REVISION = "041f2cce4d74c7539d63aa9fb85786e78072d487"
 MODEL_LICENSE = "apache-2.0"
 MODEL_KEY = "maxvit-tiny-tf-224-in1k"
 DEFAULT_WEIGHTS_DIR = Path(__file__).resolve().parents[2] / "weights" / MODEL_KEY

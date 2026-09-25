@@ -3,22 +3,22 @@
   "formatVersion": 1,
   "modelKey": "maxvit-tiny-tf-224-in1k",
   "modelId": "timm/maxvit_tiny_tf_224.in1k",
-  "revision": "unpinned",
+  "revision": "041f2cce4d74c7539d63aa9fb85786e78072d487",
   "files": [
     {
       "path": "README.md",
       "bytes": 22118,
-      "sha256": null
+      "sha256": "710144bf52c7f7fbe89276b75531012b5f949a6b662fdfc80b2c4bb23d3557d5"
     },
     {
       "path": "config.json",
       "bytes": 597,
-      "sha256": null
+      "sha256": "2f1e961e47c43f8378ea90c4c12cb0a21933eaa121070f0e29b004ddfd92f569"
     },
     {
       "path": "model.safetensors",
       "bytes": 123917994,
-      "sha256": null
+      "sha256": "e3998ec8e5f70ad5fa7682a1fa211b76d4adcb775f809b976b1a60506be113e6"
     }
   ],
   "totalBytes": 123940709,
@@ -26,7 +26,7 @@
     {
       "path": "pytorch_model.bin",
       "bytes": 124072481,
-      "sha256": null,
+      "sha256": "bb7df98fcb8576411cd97b34fdbb418bed22710fbf60943ba943fe46d332ff8b",
       "note": "pickle checkpoint of the same weights; not staged, not loaded; its Hub LFS SHA-256 is recorded for provenance only"
     }
   ]

@@ -18,7 +18,7 @@ date_published_source: "month of the MaxViT paper (arXiv:2204.01697, submitted 2
 > ⚠️ **Provided for research, training, and evaluation purposes only.** Model weights are redistributed unmodified under their upstream license, which controls your use, including any commercial use or redistribution; the accompanying code and notebooks are released under this repository's license. All of it is supplied **"as is"**, without warranty of any kind, and has not been validated for production, clinical, or safety-critical use. Running the notebooks downloads third-party weights and datasets governed by their own licenses and consumes compute on your own Colab/Kaggle account. To the maximum extent permitted by law, the maintainers of this repository and the DIMER platform accept no liability for any damages arising from their use. Hosting implies no affiliation with or endorsement by the original authors.
 
 > [!IMPORTANT]
-> The upstream snapshot is **not yet pinned**. `MODEL_REVISION` is the sentinel `"unpinned"` and the manifest records no SHA-256 digests. Until `python tools/pin_snapshot.py` records an immutable commit and every file's digest, the package refuses to stage, verify or load the weights, and the tutorial cannot run.
+> The upstream snapshot is pinned to Hub commit `041f2cce4d74c7539d63aa9fb85786e78072d487`, and the manifest records every file's SHA-256. No execution with the pinned weights has been recorded yet, so this card claims no measured value for this repository.
 
 ---
 
@@ -42,7 +42,7 @@ This repository adds gradient fine-tuning on a caller's labelled images. `from_p
 
 What this repository adds to the upstream weights:
 
-- `verify_snapshot` and `stage_missing_files`: manifest checks and staging of the pinned files, both refusing to run while the snapshot is unpinned;
+- `verify_snapshot` and `stage_missing_files`: manifest checks and staging of the pinned files, both refusing to run if `MODEL_REVISION` is ever reset to the `"unpinned"` sentinel;
 - `MaxViTPipeline.from_pretrained`: construction with `timm.create_model(..., pretrained=False)`, so timm downloads nothing itself, then `load_state_dict(strict=True)` from the verified SafeTensors file;
 - `predict`: input checks and top-k softmax scores; `zero_shot_evaluate`: a baseline that maps groups of ImageNet classes onto task labels without training;
 - `fetch_sample_archive`, `read_class_archive`, `read_class_folder`, `validate_dataset`, `split_dataset`, `validate_inputs` and `evaluation_report`: the data acquisition, validation and single-batch evaluation stages;
@@ -197,10 +197,10 @@ The following uses are prohibited even where the model would work:
 ## Immutable provenance
 
 - Model: `timm/maxvit_tiny_tf_224.in1k`
-- Revision: **not yet pinned** (`MODEL_REVISION = "unpinned"`). `python tools/pin_snapshot.py` resolves the Hub's `main` to a 40-hex commit, downloads every manifest file at that commit, records each file's SHA-256, and records the Hub's LFS SHA-256 of the reference file without downloading it.
-- Snapshot manifest: `weights/maxvit-tiny-tf-224-in1k/dimer-base-manifest.json`, 3 staged files, `totalBytes` 123940709, plus one reference file. The byte sizes are the ones the Hub reported for its `main` branch when this repository was built.
-- `model.safetensors` (executed artifact): 123,917,994 bytes; SHA-256 not yet recorded.
-- `pytorch_model.bin` (pickle of the same weights, reference only): 124,072,481 bytes; never staged or loaded; SHA-256 not yet recorded.
+- Revision: `041f2cce4d74c7539d63aa9fb85786e78072d487` (pinned 2026-09-25 by `python tools/pin_snapshot.py`, which resolved the Hub's `main` to this commit, downloaded every manifest file at it, recorded each file's SHA-256, and recorded the Hub's LFS SHA-256 of the reference file without downloading it).
+- Snapshot manifest: `weights/maxvit-tiny-tf-224-in1k/dimer-base-manifest.json`, 3 staged files, `totalBytes` 123940709, plus one reference file. The byte sizes and digests describe the files at the pinned commit.
+- `model.safetensors` (executed artifact): 123,917,994 bytes; SHA-256 `e3998ec8e5f70ad5fa7682a1fa211b76d4adcb775f809b976b1a60506be113e6` (matches the Hub's LFS record).
+- `pytorch_model.bin` (pickle of the same weights, reference only): 124,072,481 bytes; never staged or loaded; Hub LFS SHA-256 `bb7df98fcb8576411cd97b34fdbb418bed22710fbf60943ba943fe46d332ff8b`.
 - `config.json`: 597 bytes; `maxvit_tiny_tf_224`, tag `in1k`, 1000 classes, fixed 224×224 input, bicubic, `crop_pct` 0.95, ImageNet mean and standard deviation, classifier `head.fc`.
 - `README.md`: 22,118 bytes; the upstream model card.
 - Loader: `timm.create_model("maxvit_tiny_tf_224.in1k", pretrained=False, num_classes=1000)`, then `load_state_dict(safetensors.torch.load_file(<verified file>), strict=True)`.

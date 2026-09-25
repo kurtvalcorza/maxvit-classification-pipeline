@@ -1,0 +1,33 @@
+{
+  "format": "dimer_hf_snapshot",
+  "formatVersion": 1,
+  "modelKey": "maxvit-tiny-tf-224-in1k",
+  "modelId": "timm/maxvit_tiny_tf_224.in1k",
+  "revision": "unpinned",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 22118,
+      "sha256": null
+    },
+    {
+      "path": "config.json",
+      "bytes": 597,
+      "sha256": null
+    },
+    {
+      "path": "model.safetensors",
+      "bytes": 123917994,
+      "sha256": null
+    }
+  ],
+  "totalBytes": 123940709,
+  "referenceFiles": [
+    {
+      "path": "pytorch_model.bin",
+      "bytes": 124072481,
+      "sha256": null,
+      "note": "pickle checkpoint of the same weights; not staged, not loaded; its Hub LFS SHA-256 is recorded for provenance only"
+    }
+  ]
+}

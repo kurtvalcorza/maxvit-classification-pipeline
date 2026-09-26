@@ -2,7 +2,7 @@
 
 DIMER pipeline for **MaxViT-Tiny** (`timm/maxvit_tiny_tf_224.in1k`), a hybrid convolution and multi-axis attention classifier trained on ImageNet-1k by the paper authors and ported to PyTorch in timm. The pipeline loads the checkpoint only from a digest-verified local snapshot, returns top-k softmax scores over the ImageNet-1k classes, and adds a bounded fine-tuning workflow that replaces the head for a new set of classes, compares it with majority-class and zero-shot baselines, and exports a SafeTensors adapter.
 
-> **The upstream snapshot is pinned** to Hub commit `041f2cce4d74c7539d63aa9fb85786e78072d487` (pinned 2026-09-25). The manifest records every file's byte size and SHA-256, and each LFS digest matched the Hub's record. No execution with the pinned weights is recorded yet (see [Release status](#release-status)).
+> **The upstream snapshot is pinned** to Hub commit `041f2cce4d74c7539d63aa9fb85786e78072d487` (pinned 2026-09-25). The manifest records every file's byte size and SHA-256, and each LFS digest matched the Hub's record. Default-path execution recorded on 2026-09-26 (Kaggle T4); REL12 BYOD exercise pending before promotion (see [Release status](#release-status)).
 
 ## Upstream alignment
 
@@ -68,7 +68,7 @@ weights/maxvit-tiny-tf-224-in1k/
 
 ## Release status
 
-**Candidate.** The snapshot is pinned (`041f2cc`), but no execution with the pinned weights is recorded. Static checks, unit tests and the small-model test do not constitute notebook execution evidence; `docs/release-verification.md` defines the release gate.
+**Candidate.** The snapshot is pinned (`041f2cc`). Default-path execution recorded on 2026-09-26 (Kaggle T4): the exact notebook blob `b736baab41ad` (commit `0c1164e`) ran top-to-bottom with both BYOD branches off. On one seeded split of 60 held-out CIFAR-10 thumbnails, accuracy was 1.000 for the fine-tuned head and 1.000 for the zero-shot ImageNet mapping (majority baseline 0.500, untrained head 0.367), so the run shows no gain from fine-tuning; 46 of the 60 held-out images have a darkened/original counterpart in the training split, so the score is not evidence of generalisation; one runtime. REL12 BYOD exercise pending before promotion: release step 7 has not been run. Static checks, unit tests and the small-model test do not constitute notebook execution evidence; `docs/release-verification.md` defines the release gate.
 
 ## Documentation
 

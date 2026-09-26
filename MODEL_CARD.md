@@ -18,7 +18,7 @@ date_published_source: "month of the MaxViT paper (arXiv:2204.01697, submitted 2
 > ⚠️ **Provided for research, training, and evaluation purposes only.** Model weights are redistributed unmodified under their upstream license, which controls your use, including any commercial use or redistribution; the accompanying code and notebooks are released under this repository's license. All of it is supplied **"as is"**, without warranty of any kind, and has not been validated for production, clinical, or safety-critical use. Running the notebooks downloads third-party weights and datasets governed by their own licenses and consumes compute on your own Colab/Kaggle account. To the maximum extent permitted by law, the maintainers of this repository and the DIMER platform accept no liability for any damages arising from their use. Hosting implies no affiliation with or endorsement by the original authors.
 
 > [!IMPORTANT]
-> The upstream snapshot is pinned to Hub commit `041f2cce4d74c7539d63aa9fb85786e78072d487`, and the manifest records every file's SHA-256. No execution with the pinned weights has been recorded yet, so this card claims no measured value for this repository.
+> The upstream snapshot is pinned to Hub commit `041f2cce4d74c7539d63aa9fb85786e78072d487`, and the manifest records every file's SHA-256. Default-path execution recorded on 2026-09-26 (Kaggle T4); REL12 BYOD exercise pending before promotion. The measured values under Metrics come from that one run: one seeded split of 60 held-out and 60 unseen CIFAR-10 thumbnails (frog and truck), one runtime. They are tutorial evidence, not a benchmark, and most evaluation images have a near-duplicate in the training split (see Metrics).
 
 ---
 
@@ -72,7 +72,10 @@ A user is expected to know the following before relying on the output:
 - the classifier has no reject option: every image, including a blank one, receives a class;
 - accuracy is only meaningful next to the majority-class baseline of the same data, and balanced accuracy is the fairer summary when classes are imbalanced;
 - sketches, screenshots, medical, aerial and thermal images, and very small images upsampled to 224 px, are distribution shifts from ImageNet photographs;
-- a fine-tune on a few hundred images demonstrates the workflow and does not produce a deployable classifier.
+- a fine-tune on a few hundred images demonstrates the workflow and does not produce a deployable classifier;
+- the tutorial's split is by image ID and not duplicate-aware: in the recorded run 46 of 60 held-out and 36 of 60 unseen images had their darkened/original counterpart in the training split, so its held-out and unseen scores are not evidence of generalisation;
+- in the recorded tutorial run the zero-shot ImageNet mapping already scored 1.000 on held-out, equal to the fine-tuned head, so that run shows no gain from fine-tuning;
+- in the recorded tutorial run the adapted frog/truck head answered `frog` with score 0.828 for a blank image and `truck` with 0.756 for pure noise, and the ImageNet head gave one CIFAR-10 frog sample image the top-1 label `ocarina`.
 
 ###### Out-of-scope use cases
 
@@ -102,7 +105,7 @@ The tutorial sample is itself an instrument: CIFAR-10 images are 32×32 pixels, 
 
 ###### Environment
 
-**Operating environment.** Python 3.12 with the pins in `pyproject.toml`: `torch==2.14.0`, `torchvision==0.29.0`, `timm==1.0.29`, `safetensors==0.8.0`, `numpy==2.5.3`, `pillow==11.3.0`, `huggingface-hub==0.36.2`. Computation is float32. The code runs on CPU and uses CUDA automatically when available. No run with the pinned weights has been recorded yet, so no runtime, memory or throughput figure is given.
+**Operating environment.** Python 3.12 with the pins in `pyproject.toml`: `torch==2.14.0`, `torchvision==0.29.0`, `timm==1.0.29`, `safetensors==0.8.0`, `numpy==2.5.3`, `pillow==11.3.0`, `huggingface-hub==0.36.2`. Computation is float32. The code runs on CPU and uses CUDA automatically when available. One run with the pinned weights is recorded: Kaggle Tesla T4, 2026-09-26 UTC, torch 2.14.0+cu130 (CUDA 13.0), torchvision 0.29.0+cu130, timm 1.0.29, `cuda:0`. The whole notebook took 322.8 s wall including installs, one kernel restart and the 124 MB snapshot download; the fine-tune cell (5 epochs on 280 images) took about 32 s. No memory or throughput figure was measured.
 
 **Data environment.** The pretrained head assumes a photograph centred on one ImageNet object or scene. An adapted model assumes inference images that resemble its training images in source, framing and resolution. The tutorial's adaptation data is CIFAR-10 thumbnails, so a model adapted on it transfers to images of that kind and to little else. When these assumptions fail, the model still returns a class. The pipeline reports no signal that the distribution has shifted.
 
@@ -121,7 +124,18 @@ The tutorial sample is itself an instrument: CIFAR-10 images are 32×32 pixels, 
 
 `evaluation_report(result, truth, groups=...)` covers one batch of ImageNet-head predictions. It reports how often the true group appears in the top-1 and the top-k, with the verdict `sample-sanity`. Without labels it returns `not-measurable` and names the labelled data that would be needed.
 
-The upstream card's comparison table reports ImageNet top-1 accuracy 83.41 and top-5 accuracy 96.59 for this model. Those values are upstream-reported, and this repository does not reproduce them. No value from this repository has been recorded yet.
+The upstream card's comparison table reports ImageNet top-1 accuracy 83.41 and top-5 accuracy 96.59 for this model. Those values are upstream-reported, and this repository does not reproduce them.
+
+Values measured by this repository (one run on Kaggle Tesla T4, 2026-09-26 UTC; exact notebook blob `b736baab41ad`, commit `0c1164e`; one pass, no dispersion estimate):
+
+- **ImageNet head on 4 sample images** (CIFAR-10, 32 px upsampled): both trucks got `moving van` top-1 (0.642, 0.718); one frog got `tailed frog` (0.177) and the other `ocarina` (0.302, with `tailed frog` third at 0.115). `sample-sanity` group hit rate 0.75 at top-1 and 1.0 at top-5. This is a four-image check, not an ImageNet evaluation.
+- **Held-out** (60 images, 30 per class, split seed 0 from 400 images), accuracy / balanced accuracy: majority class 0.500 / 0.500; zero-shot ImageNet mapping 1.000 / 1.000; untrained two-class head 0.3667 / 0.3667; fine-tuned 1.000 / 1.000. The zero-shot mapping already reaches 1.000, so this run shows **no gain from fine-tuning**; frog versus truck is at ceiling on this sample.
+- **Unseen** (60 images): fine-tuned 1.000 / 1.000.
+- **Fine-tune:** full model, 30,404,554 parameters trained, 5 epochs, batch 16, AdamW lr 0.0001; epoch losses 0.3225, 0.0256, 0.0051, 0.0019, 0.0012.
+- **Degenerate probes:** the ImageNet head gave a blank image top-1 0.001 (`wing`) and noise 0.126 (`kite`); the adapted two-class head gave a blank image `frog` 0.828 and noise `truck` 0.756.
+- **Adapter reload:** 60 images compared, tolerance 0.0001, equivalent.
+
+The sample archive holds 100 groups of pixel-identical images (an `original_images` file and its same-numbered `darkened_images` file) and the tutorial's split is by ID only, not duplicate-aware. In the recorded run 46 of the 60 held-out and 36 of the 60 unseen images had their counterpart in the training split (counted from the IDs in `maxvit_classification_predictions.csv`; counterparts, not confirmed pixel copies), so the 1.000 scores are not evidence of generalisation. The BYOD branches were not exercised in this run.
 
 ###### Decision thresholds
 
@@ -131,7 +145,7 @@ No acceptance threshold on accuracy is set anywhere in the repository. A deploym
 
 ###### Approaches to uncertainty and variability
 
-Every score is one pass over one split: no repeated runs, no cross-validation, no bootstrap and no confidence interval. With the default 200 images per class, the tutorial's held-out split has 60 images, so one image moves accuracy by about 1.7 percentage points, and differences of a few points between methods are within noise.
+Every score, including the recorded ones, is one pass over one split: no repeated runs, no cross-validation, no bootstrap and no confidence interval. With the default 200 images per class, the tutorial's held-out split has 60 images, so one image moves accuracy by about 1.7 percentage points, and differences of a few points between methods are within noise.
 
 Sources of run-to-run variability:
 
@@ -219,7 +233,7 @@ The following uses are prohibited even where the model would work:
 
 ## Verification records
 
-No execution with the pinned weights has been recorded. The offline test suite runs the `maxvit_tiny_tf_224` architecture, shrunk to one 32-wide block per stage, with random weights through prediction, the zero-shot baseline, full and frozen fine-tuning, evaluation and adapter reload; that exercises the code path and is not a result about this model. `docs/release-verification.md` holds the release gate and the record table.
+Default-path execution recorded on 2026-09-26 (Kaggle T4): exact notebook blob `b736baab41ad` at commit `0c1164e`, 322.8 s, 14/14 post-restart code cells, both BYOD branches off; measured values are under Metrics. REL12 BYOD exercise pending before promotion. The offline test suite runs the `maxvit_tiny_tf_224` architecture, shrunk to one 32-wide block per stage, with random weights through prediction, the zero-shot baseline, full and frozen fine-tuning, evaluation and adapter reload; that exercises the code path and is not a result about this model. `docs/release-verification.md` holds the release gate and the record table.
 
 ## References
 

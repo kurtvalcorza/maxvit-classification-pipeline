@@ -18,6 +18,27 @@ TEMPLATE = {
     "notebook_name": "maxvit_classification_colab.ipynb",
     "profile": "E2E",
     "mode": "GUIDED",
+    "isolated_runtime": True,
+    "infrastructure_labels": True,
+    # The fleet's uv isolated-environment mechanism (bioclip2-biodiversity-pipeline, siglip-v1-zero-shot-pipeline): a
+    # managed CPython, a size- and SHA-256-verified uv wheel, and a lock compiled from the pyproject pins with
+    # `uv pip compile pyproject.toml --python-version 3.12 --python-platform x86_64-manylinux_2_28 --generate-hashes
+    # --only-binary :all: -o tutorials/requirements-colab.lock.txt`.
+    "managed_python": "3.12.12",
+    "uv": {
+        "version": "0.12.15",
+        "url": "https://files.pythonhosted.org/packages/1e/fd/432451d732917c49152a291de3ef171aa6b0f1a22d39780fb2c1f085ca4c/uv-0.12.15-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "bytes": 20081404,
+        "sha256": "aee9802f46bae436bd91751bb33ddeb379ef1596b5c19df193219d545d244b60",
+    },
+    "lock": "tutorials/requirements-colab.lock.txt",
+    "guided": {
+        "opening": [
+            (
+                "**Who this notebook is for.** A learner who knows basic Python, has run a Colab or Jupyter notebook, and wants to see how an ImageNet classifier is turned into a classifier for their own two classes — with honest baselines measured first, a bounded fine-tune, a held-out and an unseen evaluation, and an adapter that reloads exactly. No prior experience with MaxViT or fine-tuning is assumed; *softmax*, *zero-shot mapping*, *balanced accuracy*, *re-heading* and the other terms are explained where they first matter and again in the **Glossary**. The intended audience is learners and practitioners adapting an image classifier; this is a teaching run on CIFAR-10 thumbnails, not a benchmark. A T4 GPU is the documented runtime for the fine-tuning; CPU works, more slowly.\n\n**Input → Model → Output.**\n\n| | What it is in this notebook |\n|---|---|\n| Input | 400 pinned CIFAR-10 `frog` and `truck` thumbnails (32×32, upsampled to 224 px), split 280 / 60 / 60; BYOD: your own image or class folders |\n| Model | MaxViT-Tiny trained on ImageNet-1k; for the two classes its head is replaced and the whole model is fine-tuned for 5 epochs |\n| Output | ImageNet top-k on sample images; held-out and unseen accuracy and balanced accuracy beside majority-class, zero-shot ImageNet and untrained-head baselines; a 122 MB adapter that reloads to equivalent predictions |\n\n**How to use this notebook.** Choose **Runtime → Change runtime type → T4 GPU**, then **Runtime → Run all**. Run all completes in one pass: Section 1 installs nothing into the notebook's own Python, so no restart is needed. Sections 1–3 are **infrastructure** — the isolated environment, the carried package and the pinned checkpoint — and their cells are collapsed. The learning path starts in Section 4. Form fields (`# @param`) are the knobs; re-run from Section 7 after changing one (Section 7 builds a fresh re-headed model). Before each principal result the notebook asks you to **Predict**; after it comes a collapsible **Check your reasoning** with a worked answer from the recorded Kaggle T4 run of 26 September 2026 (`docs/release-verification.md`). **Read the baselines first:** on this sample the zero-shot ImageNet mapping already scores 1.000, so the recorded run shows no gain from fine-tuning. **Troubleshooting**, a **Glossary** and a **Conclusion** template are at the end.\n\n**Roadmap:** 1–3 infrastructure → 4 the pinned sample and its validation → 5 split and two baselines *(evaluation practice)* → 6 degenerate inputs → 7 re-head and the untrained baseline → 8 bounded fine-tuning *(core concept)* → 9 held-out evaluation *(evaluation practice)* → 10 the unseen split and the probes again → 11 export, reload and equivalence *(engineering)* → 12 outputs → 13 your own data (optional) → interpretation, troubleshooting, glossary, conclusion."
+            )
+        ]
+    },
     "pipeline_class": "MaxViTPipeline",
     "weights_key": "maxvit-tiny-tf-224-in1k",
     "modules": [
@@ -90,12 +111,12 @@ TEMPLATE = {
         "detection, segmentation or multi-label tagging."
     ),
     "prerequisites": [
-        "- **Runtime:** a fresh supported runtime (Google Colab or Jupyter, Python 3.12). A CUDA GPU such as a Colab or Kaggle T4 is the documented runtime for the fine-tuning stages and is used automatically when present; the notebook also runs on CPU, more slowly. Runtimes are not measured in this revision. The pinned `torch==2.14.0` wheel is the largest download; the checkpoint is about 124 MB.",
+        "- **Runtime:** a fresh supported runtime (Google Colab or Jupyter, Python 3.12). A CUDA GPU such as a Colab or Kaggle T4 is the documented runtime for the fine-tuning stages and is used automatically when present; the notebook also runs on CPU, more slowly. Runtimes are not measured in this revision. Section 1 builds a separate environment from the hash-locked pins (nothing is installed into the notebook's own Python, so no restart is needed); its PyTorch wheels are the largest download; the checkpoint is about 124 MB.",
         '- **Knowledge:** basic Python and PIL; what a softmax over classes is; convolution and self-attention at the level of "local versus global context"; accuracy, balanced accuracy and a confusion matrix; why a baseline is needed before a score means anything.',
         "- **Data:** the default path downloads one pinned archive, `CIFAR-10-subset.zip` from the Hugging Face dataset `Cleanlab/cifar-10-subset` (MIT licence, 986,707 bytes, verified by SHA-256 before it is opened), and keeps its `frog` and `truck` folders. BYOD is optional and off by default. Expected BYOD input: one image, or a directory (or `.zip`) of class folders, `<class>/<image>`, with at least 2 images per class. Do not upload confidential or restricted data to a hosted notebook environment unless you are authorized to do so; uploaded inputs stay in this runtime and are not sent to any inference API.",
     ],
     "run_all": (
-        "Selecting **Run all** in a fresh supported runtime installs the pinned dependencies, stages and digest-verifies the pinned checkpoint, "
+        "Selecting **Run all** in a fresh supported runtime builds an isolated environment from the hash-locked pins (nothing is installed into the notebook's own Python, so no restart is needed and Run all completes in one pass), stages and digest-verifies the pinned checkpoint, "
         "downloads and digest-verifies the pinned CIFAR-10 subset, validates and splits it, measures the majority-class and zero-shot ImageNet "
         "baselines, probes the model with a blank and a noise image, **runs the bounded fine-tune**, evaluates the held-out split, classifies an "
         "unseen split, exports the adapter, reloads it onto a fresh base model to verify the predictions, and writes machine-readable outputs "
@@ -120,7 +141,9 @@ TEMPLATE = {
                 "`validate_dataset` checks every record before any model runs: record keys, image type and size, and labels. It reports classes "
                 "with too few images as errors, and imbalance and pixel-identical duplicates as findings.\n\n"
                 "**What to look for:** CIFAR-10 images are 32×32 pixels. The model's preprocessing upsamples them to 224×224, so every image the "
-                "network sees here is a blurred thumbnail, far from the photographs ImageNet was collected from."
+                "network sees here is a blurred thumbnail, far from the photographs ImageNet was collected from.\n\n"
+                "**Predict:** will `validate_dataset` accept the 400 images without any finding?\n\n"
+                + "<details><summary>Check your reasoning</summary>\n\nIt accepts them, with one finding: the recorded run reported **100 groups of pixel-identical images** among 400 records (200 per class, 32×32). Duplicates matter for leakage, which is why the split in Section 5 checks ids — and why pixel duplicates across splits remain a caveat for the scores.\n\n</details>"
             ),
             "code": (
                 "import hashlib\n"
@@ -160,7 +183,8 @@ TEMPLATE = {
                 "softmax mass over ImageNet's three frog classes and over its big-truck classes (fire engine, garbage truck, moving van, tow truck, "
                 "trailer truck; CIFAR-10's `truck` excludes pickups), and answers whichever group is larger. No weight changes.\n\n"
                 "The cell also prints ImageNet top-5 predictions for four images and a `sample-sanity` evaluation report: does the true group appear "
-                "in the top-1 or the top-5?"
+                "in the top-1 or the top-5?\n\n"
+                + "<details><summary>Check your reasoning</summary>\n\nRecorded run: the two trucks came back as `moving van` (0.642, 0.718); one frog as `tailed frog` (0.177), the other as `ocarina` (0.302) with `tailed frog` third — top-1 group hit rate 0.75, top-5 1.0. On held-out, the zero-shot mapping scored **1.000** accuracy and the majority class 0.500.\n\n</details>"
             ),
             "code": (
                 'SEED = 0  # @param {{type:"integer"}}\n'
@@ -193,7 +217,9 @@ TEMPLATE = {
                 'A closed-set classifier has no "none of these" answer: every image gets one of its classes, with a score that sums to 1 across '
                 "them. The cell shows what the ImageNet head answers for a white image and for uniform noise, and how high its top score is.\n\n"
                 "**What to look for:** a confident label on structure-free input is a property of softmax classification, not evidence about the "
-                "image. The same probe is repeated on the adapted two-class model in Section 10."
+                "image. The same probe is repeated on the adapted two-class model in Section 10.\n\n"
+                "**Predict:** will the ImageNet head be confident about a blank image?\n\n"
+                + "<details><summary>Check your reasoning</summary>\n\nNo: the recorded run gave the blank image `wing` 0.001 and the noise image `kite` 0.126 — low, spread-out scores over 1,000 classes. Compare Section 10, where the two-class head has no way to say neither.\n\n</details>"
             ),
             "code": (
                 "degenerate = {{}}\n"
@@ -211,7 +237,9 @@ TEMPLATE = {
                 "(`head.fc`, 512 features to 1000 classes) with a new 512-to-2 layer initialised under `SEED`. Every other weight, including the head's LayerNorm and Tanh layer, keeps its "
                 "ImageNet value.\n\n"
                 "**Expect roughly chance.** A randomly initialised head carries no information about frogs or trucks. This row shows the floor, and "
-                "that the fine-tune — not the re-heading — is what moves the score."
+                "that the fine-tune — not the re-heading — is what moves the score.\n\n"
+                "**Predict:** a random two-class head on a strong backbone: above or below the majority class?\n\n"
+                + "<details><summary>Check your reasoning</summary>\n\nBelow, in the recorded run: 0.3667 accuracy (recall frog 0.5667, truck 0.1667) against the majority class's 0.500. A new head knows nothing until it is trained.\n\n</details>"
             ),
             "code": (
                 "adapter = MaxViTPipeline.from_pretrained(weights_dir=WEIGHTS_DIR, class_names=SAMPLE_CLASSES, seed=SEED)\n"
@@ -232,7 +260,9 @@ TEMPLATE = {
                 "- **Schedule:** `EPOCHS` epochs of AdamW at learning rate `1e-4` with weight decay `0.01`, batch size 16, float32, seed `SEED`, "
                 "and no data augmentation: training images go through the same evaluation transform as test images.\n\n"
                 "**Read the loss as optimisation evidence only.** A falling training loss says the optimizer is fitting the training images; the "
-                "held-out comparison in the next section is the task evidence."
+                "held-out comparison in the next section is the task evidence.\n\n"
+                "**Predict:** by what factor will the training loss fall over 5 epochs?\n\n"
+                + "<details><summary>Check your reasoning</summary>\n\nBy more than 200×: 0.3225 → 0.0012 in the recorded run, with all 30.4 M parameters trainable. Optimisation evidence only.\n\n</details>"
             ),
             "code": (
                 'LEARNING_RATE = 1e-4  # @param {{type:"number"}}\n'
@@ -258,7 +288,9 @@ TEMPLATE = {
                 "All four rows are scored on the same held-out images. `accuracy` is the fraction answered correctly; `balanced_accuracy` averages "
                 "the per-class recall, so it cannot be inflated by favouring the larger class. The confusion matrix shows which way the errors go. "
                 "These are tutorial metrics from one pass over a few dozen thumbnails, with no dispersion estimate: a difference of one or two "
-                "images is within noise."
+                "images is within noise.\n\n"
+                "**Predict:** will the fine-tuned model beat the zero-shot ImageNet mapping on held-out?\n\n"
+                + "<details><summary>Check your reasoning</summary>\n\nNo — both scored 1.000 accuracy and balanced accuracy in the recorded run (confusion [[30, 0], [0, 30]]). Frog versus truck is at ceiling for this backbone, so this sample shows that the workflow runs, not that fine-tuning helps; a harder or domain-specific BYOD set is needed to see a gain.\n\n</details>"
             ),
             "code": (
                 "adapted = adapter.evaluate(held_out, majority=TRAIN_MAJORITY)\n"
@@ -279,7 +311,9 @@ TEMPLATE = {
             "md": (
                 "## 10. Inference on the unseen split and the degenerate probes again\n\n"
                 "The unseen split was never used for training or for any comparison above. The adapted pipeline classifies it, and the cell repeats "
-                "the blank and noise probes: the two-class model must now answer `frog` or `truck` for them, whatever they contain."
+                "the blank and noise probes: the two-class model must now answer `frog` or `truck` for them, whatever they contain.\n\n"
+                "**Predict:** what will the adapted model say about a blank image?\n\n"
+                + "<details><summary>Check your reasoning</summary>\n\n`frog` at 0.828 (and `truck` 0.756 for noise) in the recorded run — confident answers about nothing, because the two-class head has no reject option. That is a property to remember before deploying any closed-set classifier.\n\n</details>"
             ),
             "code": (
                 "unseen_metrics = adapter.evaluate(unseen, majority=TRAIN_MAJORITY)\n"
@@ -301,7 +335,9 @@ TEMPLATE = {
                 "default full fine-tune that is the whole state dict; with `FREEZE_BACKBONE = True` it is the head only.\n\n"
                 "`load_artifact` then builds a **fresh** pipeline from the verified base snapshot, loads the adapter tensors onto it, and refuses an "
                 "adapter whose format, base identity, base digest or tensor set does not fit. The cell compares the reloaded predictions with the "
-                "in-memory model's on the unseen split, with a stated tolerance: loading succeeding is not the check, reproducing the predictions is."
+                "in-memory model's on the unseen split, with a stated tolerance: loading succeeding is not the check, reproducing the predictions is.\n\n"
+                "**Predict:** why compare predictions after reload instead of just checking that the file loads?\n\n"
+                + "<details><summary>Check your reasoning</summary>\n\nBecause a file can load and still be the wrong weights. The recorded run compared 60 unseen images at tolerance 0.0001 and found them equivalent; any difference stops the notebook — a contract failure, not a quality result.\n\n</details>"
             ),
             "code": (
                 "artifact_path = OUTPUTS / 'maxvit_adapter.safetensors'\n"
@@ -387,7 +423,8 @@ TEMPLATE = {
                 "→ export → reload stages as the sample; the zero-shot ImageNet baseline needs a class-to-ImageNet mapping, so it is skipped here.\n\n"
                 "Set `BYOD_IMAGE_PATH` or `BYOD_DATASET_PATH` to read from a mounted or local location; leave them empty on Colab to get an upload "
                 "dialog instead. Uploaded files are written under `outputs/byod/` in this runtime and are not sent anywhere else. The first lines of "
-                "the cell show the validator refusing two malformed inputs with messages that name the failed rule."
+                "the cell show the validator refusing two malformed inputs with messages that name the failed rule. A path that does not exist, a "
+                "runtime without the upload dialog and a cancelled upload are refused with a message naming the field to set."
             ),
             "code": (
                 'USE_BYOD_IMAGE = False  # @param {{type:"boolean"}}\n'
@@ -403,14 +440,25 @@ TEMPLATE = {
                 "    except (TypeError, ValueError) as exc:\n"
                 "        print(f'refused as expected: {{desc}} -> {{type(exc).__name__}}: {{exc}}')\n\n"
                 "BYOD_DIR = OUTPUTS / 'byod'\n\n"
-                "def _upload_into(target):\n"
-                "    from google.colab import files  # type: ignore[import-not-found]\n"
+                "def _upload_into(target, field):\n"
+                "    try:\n"
+                "        from google.colab import files  # type: ignore[import-not-found]\n"
+                "    except ImportError:\n"
+                "        raise RuntimeError(f'{{field}} is empty and this runtime has no Colab upload dialog: set {{field}} to a path in this runtime') from None\n"
+                "    uploaded = files.upload() or {{}}\n"
+                "    if not uploaded:\n"
+                "        raise RuntimeError(f'the upload was cancelled or empty: run this cell again and choose the file, or set {{field}}')\n"
                 "    target.mkdir(parents=True, exist_ok=True)\n"
-                "    for name, data in files.upload().items():\n"
+                "    for name, data in uploaded.items():\n"
                 "        (target / Path(name).name).write_bytes(data)\n"
-                "    return target\n\n"
+                "    return target\n\n\n"
+                "def _existing(path_text, field, what):\n"
+                "    path = Path(path_text.strip()).expanduser()\n"
+                "    if not path.exists():\n"
+                "        raise FileNotFoundError(f'{{field}} {{str(path)!r}} does not exist: give the path of {{what}}')\n"
+                "    return path\n\n\n"
                 "if USE_BYOD_IMAGE:\n"
-                "    image_path = Path(BYOD_IMAGE_PATH) if BYOD_IMAGE_PATH else next(iter(sorted(_upload_into(BYOD_DIR / 'image').iterdir())))\n"
+                "    image_path = _existing(BYOD_IMAGE_PATH, 'BYOD_IMAGE_PATH', 'one image file') if BYOD_IMAGE_PATH.strip() else sorted(_upload_into(BYOD_DIR / 'image', 'BYOD_IMAGE_PATH').iterdir())[0]\n"
                 "    with Image.open(image_path) as handle:\n"
                 "        byod_image = handle.convert('RGB')\n"
                 "    print(validate_inputs(byod_image, top_k=TOP_K, names=[image_path.name])['verdict'])\n"
@@ -420,7 +468,7 @@ TEMPLATE = {
                 "else:\n"
                 "    print('BYOD image branch is off; set USE_BYOD_IMAGE = True to classify your own image.')\n\n"
                 "if USE_BYOD_DATASET:\n"
-                "    source = Path(BYOD_DATASET_PATH) if BYOD_DATASET_PATH else next(iter(sorted(_upload_into(BYOD_DIR / 'dataset').iterdir())))\n"
+                "    source = _existing(BYOD_DATASET_PATH, 'BYOD_DATASET_PATH', 'a directory or a .zip of class folders') if BYOD_DATASET_PATH.strip() else sorted(_upload_into(BYOD_DIR / 'dataset', 'BYOD_DATASET_PATH').iterdir())[0]\n"
                 "    byod_records = read_class_archive(source) if source.suffix.lower() == '.zip' else read_class_folder(source)\n"
                 "    byod_names = sorted({{r['label'] for r in byod_records}})\n"
                 "    print(json.dumps(validate_dataset(byod_records, byod_names, epochs=EPOCHS), indent=2))\n"
@@ -455,9 +503,35 @@ TEMPLATE = {
         "**Reproducibility.** Seeds are form fields (`DATASET_SEED`, `SEED`), the run is float32 with no data augmentation, and the new head is "
         "initialised under `SEED`. GPU kernels are not forced to be deterministic, so repeated GPU runs can differ in the last digits of the loss "
         "and the scores.\n\n"
-        "**Try next.** Set `FREEZE_BACKBONE = True` and compare the held-out scores and runtime of a head-only fine-tune, or lower `PER_CLASS` "
+        "## Change one thing (next experiments)\n\n"
+        "Set `FREEZE_BACKBONE = True` and compare the held-out scores and runtime of a head-only fine-tune, or lower `PER_CLASS` "
         "and watch how quickly the fine-tuned model falls back toward the zero-shot baseline. To transfer the workflow, point `BYOD_DATASET_PATH` "
-        "at a small set of class folders from your own domain.\n\n"
+        "at a small set of class folders from your own domain — the sample is at ceiling, so your own harder classes are where a fine-tuning "
+        "gain can actually show. Re-run from Section 7 after any change.\n\n"
+        "## Troubleshooting\n\n"
+        "Section 1 stops with `This notebook needs a Linux x86_64 runtime`: use Google Colab, Kaggle or a Linux Jupyter host. "
+        "`The pinned uv wheel failed its size/SHA-256 check`: run Section 1 again; if it repeats, the download is being altered. "
+        "`The isolated environment's Python process exited`: the worker crashed, usually out of memory — lower `BATCH_SIZE`, restart the "
+        "session and choose **Run all**. A size or SHA-256 error in Section 3 or from `fetch_sample_archive` in Section 4: delete the file "
+        "under `weights/` and re-run that section. A `ValueError` from `validate_inputs` or `validate_dataset`: the message names the record "
+        "and the rule. With BYOD: `… does not exist`, `… no Colab upload dialog` or `the upload was cancelled or empty` — fix the path field "
+        "or the upload. An equivalence failure in Section 11: delete the adapter file and re-run Section 11.\n\n"
+        "## Glossary\n\n"
+        "- **Softmax / top-k:** the model's scores over classes, normalised to sum to 1, and the k highest; not calibrated probabilities.\n"
+        "- **Zero-shot mapping:** reading the two tutorial classes off the ImageNet head by summing the scores of related ImageNet classes — no training.\n"
+        "- **Majority-class baseline:** always answering the most common training class.\n"
+        "- **Accuracy / balanced accuracy:** the share of correct answers, and the mean of per-class recalls (robust to class imbalance).\n"
+        "- **Re-heading:** replacing the 1,000-class head with a new two-class one before fine-tuning.\n"
+        "- **Held-out / unseen split:** images never used for training; the unseen split is a second, independent check.\n"
+        "- **Closed set / no reject option:** the adapted model must answer one of its classes, even for a blank image.\n"
+        "- **Adapter:** the tensors the fine-tune changed, saved with the base model's digest so it only loads onto the right base.\n"
+        "- **Isolated environment:** the separate hash-locked Python environment built in Section 1; every later cell runs there.\n\n"
+        "## Conclusion (your notes)\n\n"
+        "1. In two sentences: did fine-tuning help on this sample, and which baseline tells you so?\n"
+        "2. What did the blank and noise probes show about a closed-set classifier?\n"
+        "3. Which of your predictions were wrong, and what did the output show instead?\n"
+        "4. What data would you need to show a real fine-tuning gain for your own classes?\n\n"
+        "**Your notes:**\n\n"
         "## References\n\n"
         "- Tu, Z., Talebi, H., Zhang, H., Yang, F., Milanfar, P., Bovik, A. and Li, Y. (2022). *MaxViT: Multi-Axis Vision Transformer.* ECCV 2022. [arXiv:2204.01697](https://arxiv.org/abs/2204.01697).\n"
         "- Hugging Face checkpoint: [timm/maxvit_tiny_tf_224.in1k](https://huggingface.co/timm/maxvit_tiny_tf_224.in1k) — Apache-2.0; upstream code and weights: [google-research/maxvit](https://github.com/google-research/maxvit) — Apache-2.0; port: [huggingface/pytorch-image-models](https://github.com/huggingface/pytorch-image-models).\n"

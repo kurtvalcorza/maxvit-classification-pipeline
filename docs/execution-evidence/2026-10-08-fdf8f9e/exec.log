@@ -1,0 +1,223 @@
+[colab] Parsing notebook '/home/kurt/colab-runs/maxvit-classification-pipeline-fdf8f9e-9e2b7e/maxvit_classification_colab_fdf8f9e_colab-cli-t4.ipynb'...
+[colab] Executing cell 1/16 - Infrastructure: install the locked runtime into an isolated environment...
+{'isolated_environment': '/content/dimer_isolated_env', 'isolated_python': '3.12.12', 'kernel_python': '3.13.15', 'locked_packages': 44, 'setup_seconds': 57}
+[colab] Executing cell 2/16 - Route the remaining cells to the isolated environment...
+Every later code cell now runs in /content/dimer_isolated_env/bin/python (pid 1139).
+[colab] Executing cell 3/16 - maxvit_classification-07...
+{'notebook_source': {'repository': 'maxvit-classification-pipeline', 'repository_revision': '67f82e4c69f1eafd46d85d7b2f036e2a800bf6b1', 'embedded_module': 'src/maxvit_classification_pipeline/pipeline.py', 'embedded_modules': ['src/maxvit_classification_pipeline/data.py', 'src/maxvit_classification_pipeline/pipeline.py'], 'module_sha256': '8f3a47ee93960c6fe1306f24ad5cb9ba339a4287a930b73711f0218af506ba9b', 'generator': 'build_notebook.py/2.1', 'notebook_spec': '2.2'}, 'python': '3.12.12', 'torch': '2.14.0+cu130', 'torchvision': '0.29.0+cu130', 'timm': '1.0.29', 'numpy': '2.5.3', 'PIL': '11.3.0', 'cuda': True}
+[colab] Executing cell 4/16 - maxvit_classification-09...
+[colab] Executing cell 5/16 - maxvit_classification-11...
+[colab] Executing cell 6/16 - maxvit_classification-13...
+{'model_id': 'timm/maxvit_tiny_tf_224.in1k', 'revision': '041f2cce4d74c7539d63aa9fb85786e78072d487', 'license': 'apache-2.0', 'files': 3, 'total_bytes': 123940709}
+{'weights_dir': '/content/weights/maxvit-tiny-tf-224-in1k', 'fetched': ['README.md', 'config.json', 'model.safetensors']}
+{'verified_files': 3, 'revision': '041f2cce4d74c7539d63aa9fb85786e78072d487'}
+{'device': 'cuda:0', 'source': '/content/weights/maxvit-tiny-tf-224-in1k'}
+[colab] Executing cell 7/16 - maxvit_classification-15...
+{'dataset_id': 'Cleanlab/cifar-10-subset', 'revision': 'bb5a7aabf1d14d2d1e3e49d0d8f917bda3622f75', 'license': 'mit', 'bytes': 986707, 'sha256': '66f90a4f87d865e8eb653b62f10e754684075a32314177de76832349d4b1fb19', 'fetched': True}
+{
+  "n_records": 400,
+  "class_names": [
+    "frog",
+    "truck"
+  ],
+  "images_per_class": {
+    "frog": 200,
+    "truck": 200
+  },
+  "image_side_px": [
+    32,
+    32
+  ],
+  "duplicate_groups": 100,
+  "epochs": 5,
+  "findings": [
+    "100 group(s) of pixel-identical images, e.g. ['CIFAR-10-subset/darkened_images/truck/image_0.png', 'CIFAR-10-subset/original_images/truck/image_0.png']"
+  ],
+  "verdict": "accepted"
+}
+{
+  "records": 400,
+  "groups": 200,
+  "groups_with_duplicates": 200,
+  "records_in_duplicate_groups": 400,
+  "exact_copies": 100,
+  "near_duplicate_links": 100,
+  "mixed_label_groups": 0,
+  "mixed_label_examples": [],
+  "method": "pixel digest, or 16x16 grayscale correlation >= 0.95"
+}
+<PIL.Image.Image image mode=RGB size=512x128 at 0x7868D935AEA0>
+
+[Image saved to: /tmp/tmp5z9nmvyu.png]
+[colab] Executing cell 8/16 - maxvit_classification-17...
+{
+  "train": 280,
+  "held_out": 60,
+  "unseen": 60,
+  "train_majority": "frog",
+  "duplicates_across_splits": {
+    "held_out": {
+      "records": 60,
+      "pixel_copy_in_reference": 0,
+      "near_duplicate_in_reference": 0
+    },
+    "unseen": {
+      "records": 60,
+      "pixel_copy_in_reference": 0,
+      "near_duplicate_in_reference": 0
+    },
+    "unseen_vs_held_out": {
+      "records": 60,
+      "pixel_copy_in_reference": 0,
+      "near_duplicate_in_reference": 0
+    }
+  }
+}
+frog -> [('fox squirrel', 0.093), ('tailed frog', 0.024), ('marmoset', 0.011), ('titi', 0.006), ('barn spider', 0.006)]
+frog -> [('fox squirrel', 0.522), ('tailed frog', 0.113), ('marmoset', 0.008), ('bullfrog', 0.004), ('redbone', 0.004)]
+truck -> [('snowplow', 0.615), ('mobile home', 0.05), ('moving van', 0.049), ('boathouse', 0.025), ('trailer truck', 0.012)]
+truck -> [('snowplow', 0.615), ('mobile home', 0.05), ('moving van', 0.049), ('boathouse', 0.025), ('trailer truck', 0.012)]
+{'verdict': 'sample-sanity', 'metrics': [(1, 0.0), (5, 1.0)]}
+{
+  "accuracy": 0.9666666666666667,
+  "balanced_accuracy": 0.9666666666666667,
+  "majority_baseline_accuracy": 0.5,
+  "mean_group_mass": 0.42351678013801575,
+  "per_class_recall": {
+    "frog": 0.9333333333333333,
+    "truck": 1.0
+  }
+}
+[colab] Executing cell 9/16 - maxvit_classification-19...
+{
+  "blank": [
+    [
+      "wing",
+      0.001
+    ],
+    [
+      "nematode",
+      0.001
+    ],
+    [
+      "sandbar",
+      0.001
+    ]
+  ],
+  "noise": [
+    [
+      "kite",
+      0.126
+    ],
+    [
+      "bald eagle",
+      0.063
+    ],
+    [
+      "black stork",
+      0.053
+    ]
+  ]
+}
+[colab] Executing cell 10/16 - maxvit_classification-21...
+{'class_names': ['frog', 'truck'], 'reinitialised': ['head.fc.'], 'device': 'cuda:0'}
+{'accuracy': 0.35, 'balanced_accuracy': 0.35, 'per_class_recall': {'frog': 0.6333333333333333, 'truck': 0.06666666666666667}}
+[colab] Executing cell 11/16 - maxvit_classification-23...
+epoch 1/5  loss 0.3324
+epoch 2/5  loss 0.0249
+epoch 3/5  loss 0.0086
+epoch 4/5  loss 0.0024
+epoch 5/5  loss 0.0014
+{
+  "freeze_backbone": false,
+  "trainable_parameters": 30404554,
+  "total_parameters": 30404554,
+  "epochs": 5,
+  "batch_size": 16,
+  "learning_rate": 0.0001,
+  "optimizer": "AdamW",
+  "augmentation": "none (evaluation transform)",
+  "precision": "float32",
+  "device": "cuda:0",
+  "train_seconds": 32.8
+}
+[colab] Executing cell 12/16 - maxvit_classification-25...
+method                         correct  accuracy      95% Wilson  balanced
+majority class                   30/60     0.500  [0.377, 0.623]     0.500
+zero-shot ImageNet mapping       58/60     0.967  [0.886, 0.991]     0.967
+untrained two-class head         21/60     0.350  [0.242, 0.476]     0.350
+fine-tuned                       60/60     1.000  [0.940, 1.000]     1.000
+confusion (rows true, columns predicted): {'labels': ['frog', 'truck'], 'rows_true_cols_predicted': [[30, 0], [0, 30]]}
+reading: fine-tuned 60/60 and zero-shot 58/60: the 95% Wilson intervals overlap, so this split cannot tell them apart
+{'run': 0, 'freeze_backbone': False, 'per_class': 200, 'epochs': 5, 'learning_rate': 0.0001, 'trainable_parameters': 30404554, 'held_out_n': 60, 'zero_shot_accuracy': 0.9667, 'fine_tuned_accuracy': 1.0, 'final_loss': 0.0014, 'train_seconds': 32.8}
+[colab] Executing cell 13/16 - maxvit_classification-27...
+{'correct': 60, 'n': 60, 'accuracy': 1.0, 'wilson_95': [0.9398, 1.0], 'balanced_accuracy': 1.0}
+[
+  {
+    "id": "CIFAR-10-subset/darkened_images/frog/image_15.png",
+    "truth": "frog",
+    "predicted": "frog",
+    "score": 0.9997
+  },
+  {
+    "id": "CIFAR-10-subset/original_images/frog/image_15.png",
+    "truth": "frog",
+    "predicted": "frog",
+    "score": 0.9992
+  },
+  {
+    "id": "CIFAR-10-subset/darkened_images/frog/image_75.png",
+    "truth": "frog",
+    "predicted": "frog",
+    "score": 0.9994
+  },
+  {
+    "id": "CIFAR-10-subset/original_images/frog/image_75.png",
+    "truth": "frog",
+    "predicted": "frog",
+    "score": 0.9955
+  },
+  {
+    "id": "CIFAR-10-subset/darkened_images/frog/image_58.png",
+    "truth": "frog",
+    "predicted": "frog",
+    "score": 0.9995
+  },
+  {
+    "id": "CIFAR-10-subset/original_images/frog/image_58.png",
+    "truth": "frog",
+    "predicted": "frog",
+    "score": 0.9981
+  }
+]
+{'blank': [('frog', 0.766), ('truck', 0.234)], 'noise': [('truck', 0.509), ('frog', 0.491)]}
+[colab] Executing cell 14/16 - maxvit_classification-29...
+{
+  "path": "outputs/maxvit_adapter.safetensors",
+  "bytes": 121870424,
+  "sha256": "273440be3fcf9f4549b2c167db802bcb95ec21a9309372f76a71beab83d266b3",
+  "format": "maxvit-adapter-v1",
+  "class_names": [
+    "frog",
+    "truck"
+  ],
+  "tensors": 560,
+  "frozen_prefixes": [],
+  "base_state_digest": "e3998ec8e5f70ad5fa7682a1fa211b76d4adcb775f809b976b1a60506be113e6",
+  "model_id": "timm/maxvit_tiny_tf_224.in1k",
+  "model_revision": "041f2cce4d74c7539d63aa9fb85786e78072d487"
+}
+{'reloaded_source': 'artifact:maxvit_adapter.safetensors', 'adapted': True, 'class_names': ['frog', 'truck']}
+{'images_compared': 60, 'tolerance': 0.0001, 'equivalent': True}
+[colab] Executing cell 15/16 - maxvit_classification-31...
+  maxvit_adapter.safetensors                        121,870,424 bytes
+  maxvit_classification_evaluation_report.json              791 bytes
+  maxvit_classification_input_manifest.json               1,355 bytes
+  maxvit_classification_predictions.csv                  15,366 bytes
+  maxvit_classification_result.json                      13,263 bytes
+[colab] Executing cell 16/16 - maxvit_classification-33...
+refused as expected: non-image object -> TypeError: images must be a PIL.Image.Image or a sequence of them
+refused as expected: class with one image -> ValueError: every class needs at least 2 images to split; short classes: {'frog': 1, 'truck': 1}
+BYOD image branch is off; set USE_BYOD_IMAGE = True to classify your own image.
+BYOD dataset branch is off; set USE_BYOD_DATASET = True to adapt MaxViT-Tiny on your own class folders.
+[colab] Saving notebook with outputs to '/home/kurt/colab-runs/maxvit-classification-pipeline-fdf8f9e-9e2b7e/maxvit_classification_colab_fdf8f9e_colab-cli-t4_output.ipynb'...

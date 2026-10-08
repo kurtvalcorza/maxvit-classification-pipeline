@@ -1,10 +1,13 @@
 """DIMER ImageNet-1k classification and bounded fine-tuning package for timm MaxViT-Tiny (tf_224, in1k)."""
 
 from .data import (
+    NEAR_DUPLICATE_CORRELATION,
     SAMPLE_CLASSES,
     SAMPLE_DATASET_ID,
     SAMPLE_DATASET_REVISION,
+    assign_duplicate_groups,
     blank_image,
+    cross_split_duplicates,
     fetch_sample_archive,
     noise_image,
     read_class_archive,
@@ -12,6 +15,7 @@ from .data import (
     split_dataset,
     validate_dataset,
     verify_archive,
+    wilson_interval,
 )
 from .pipeline import (
     ARTIFACT_FORMAT,
@@ -50,14 +54,17 @@ __all__ = [
     "MODEL_KEY",
     "MODEL_LICENSE",
     "MODEL_REVISION",
+    "NEAR_DUPLICATE_CORRELATION",
     "NUM_IMAGENET_CLASSES",
     "SAMPLE_CLASSES",
     "SAMPLE_DATASET_ID",
     "SAMPLE_DATASET_REVISION",
     "MaxViTPipeline",
+    "assign_duplicate_groups",
     "blank_image",
     "build_model",
     "classification_metrics",
+    "cross_split_duplicates",
     "evaluation_report",
     "fetch_sample_archive",
     "imagenet_labels",
@@ -72,4 +79,5 @@ __all__ = [
     "validate_inputs",
     "verify_archive",
     "verify_snapshot",
+    "wilson_interval",
 ]

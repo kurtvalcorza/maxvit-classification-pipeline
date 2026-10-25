@@ -6,7 +6,7 @@
 [![Upstream](https://img.shields.io/badge/Upstream-google--research%2Fmaxvit-181717?style=flat&logo=github&logoColor=white)](https://github.com/google-research/maxvit)
 [![arXiv](https://img.shields.io/badge/arXiv-2204.01697-b31b1b.svg)](https://arxiv.org/abs/2204.01697)
 
-Notebook specification: **DIMER Notebook Specification 2.2**. The notebook is **standalone** (§4) and declares its profile and pedagogical mode (§3.4). `tools/build_notebook.py` generates it from `tools/notebook_template.py`, and it carries the package's modules, the model identity, the snapshot manifest and the runtime pins, so the exported `.ipynb` works without this repository. Do not edit the notebook by hand: edit the package or the template and regenerate (`python tools/build_notebook.py`; CI and the validator enforce `--check`).
+Notebook specification: **DIMER Notebook Specification 2.5**. The notebook is **standalone** (§4) and declares its profile and pedagogical mode (§3.4). `tools/build_notebook.py` generates it from `tools/notebook_template.py`, and it carries the package's modules, the model identity, the snapshot manifest and the runtime pins, so the exported `.ipynb` works without this repository. Do not edit the notebook by hand: edit the package or the template and regenerate (`python tools/build_notebook.py`; CI and the validator enforce `--check`).
 
 | Notebook | Profile | Mode | Carrier | Capability | Default runtime | Sample | BYOD | Run-all | Release status |
 |---|---|---|---|---|---|---|---|---|---|

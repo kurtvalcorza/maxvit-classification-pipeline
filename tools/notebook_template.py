@@ -91,6 +91,14 @@ TEMPLATE = {
         "about 30.9M parameters and 5.6 GMACs. The `timm/maxvit_tiny_tf_224.in1k` checkpoint was trained on ImageNet-1k by the paper authors in "
         "TensorFlow and ported to PyTorch in `timm`. Its head applies LayerNorm, a 512-wide Tanh layer and a linear layer that outputs a "
         "softmax over the 1000 ImageNet classes.\n\n"
+        "**What the checkpoint may already have seen (DAT9).** The checkpoint was trained on ImageNet-1k [1], [2]; this notebook's "
+        "images are CIFAR-10 [3], a labelled subset of the 80 Million Tiny Images collection, not of ImageNet. The two collections "
+        "were built separately, but both were gathered by web image search in the late 2000s, so a held-out or unseen image here may "
+        "have a near-duplicate among ImageNet's training photographs: that overlap is **possible and was not checked** (inferred from "
+        "the dataset descriptions, not verified). The concepts certainly overlap — ImageNet-1k's label set (timm's synset list) has three "
+        "frog classes (bullfrog n01641577, tree frog n01644373, tailed frog n01644900) and six truck-like ones (fire engine, "
+        "garbage truck, moving van, pickup, tow truck, trailer truck), which is what the zero-shot mapping in Section 6 uses — so the zero-shot baseline measures transfer from a model trained with these "
+        "concepts as targets, and a high zero-shot score is not evidence about classes or images the model has never met.\n\n"
         "**The input size is fixed.** Window and grid partitions need 224×224 inputs, so every image is resized (shorter side to 235 px, "
         "bicubic) and centre-cropped to 224×224 (`crop_pct` 0.95) before normalisation with the ImageNet mean and standard deviation.\n\n"
         "**The default path really adapts the model:** it downloads a pinned 400-image CIFAR-10 subset (`frog` and `truck`), groups the "
@@ -148,7 +156,7 @@ TEMPLATE = {
     ),
     "prerequisites": [
         "- **Learner:** basic Python and PIL, and Colab or Jupyter familiarity; no prior experience with MaxViT, attention or fine-tuning. The notebook explains softmax, the zero-shot mapping, re-heading, accuracy, balanced accuracy and the adapter where they are first used; the Glossary repeats them.",
-        "- **Runtime:** a fresh supported runtime (Google Colab, Kaggle or Linux Jupyter — **Linux x86_64 only**; the notebook builds its own isolated Python 3.12.12 environment, so a Windows or macOS kernel is not supported). A CUDA GPU such as a Colab or Kaggle T4 is recommended for the fine-tune and is used automatically when present; the notebook also runs on CPU, much more slowly. Measured, each figure with its environment: a Kaggle Tesla T4 run of the earlier in-kernel-install revision (notebook blob `b736baab`, 2026-09-26) took 322.8 s in two passes — 248.7 s until the install cell stopped for a restart, then 74.0 s for every cell after the restart, about 32 s of it the fine-tune; a local CPU run of this revision (Windows workstation, 2026-10-08, install skipped, files pre-staged, host shared with other jobs) took 656 s of cell time, 555 s of it the fine-tune. This revision's isolated-environment build has not yet been timed on a hosted runtime; expect it to add a few minutes (an estimate). The locked install (PyTorch 2.14.0 with its CUDA libraries) is the largest download; the checkpoint is about 124 MB.",
+        "- **Runtime:** a fresh supported runtime (Google Colab, Kaggle or Linux Jupyter — **Linux x86_64 only**; the notebook builds its own isolated Python 3.12.12 environment, so a Windows or macOS kernel is not supported). A CUDA GPU such as a Colab or Kaggle T4 is recommended for the fine-tune and is used automatically when present; the notebook also runs on CPU, much more slowly. Measured, each figure with its environment: a Kaggle Tesla T4 run of the earlier in-kernel-install revision (notebook blob `b736baab`, 2026-09-26) took 322.8 s in two passes — 248.7 s until the install cell stopped for a restart, then 74.0 s for every cell after the restart, about 32 s of it the fine-tune; a local CPU run of this revision (Windows workstation, 2026-10-08, install skipped, files pre-staged, host shared with other jobs) took 656 s of cell time, 555 s of it the fine-tune. On a fresh Colab T4 the isolated-environment build took 57 s and the fine-tune 32.8 s (the Colab T4 run of blob `1eaf44ab`, commit `fdf8f9e`, 8 October 2026, not re-run here). The locked install (PyTorch 2.14.0 with its CUDA libraries) is the largest download; the checkpoint is about 124 MB.",
         '- **Knowledge:** basic Python and PIL; what a softmax over classes is; convolution and self-attention at the level of "local versus global context"; accuracy, balanced accuracy and a confusion matrix; why a baseline is needed before a score means anything.',
         "- **Data:** the default path downloads one pinned archive, `CIFAR-10-subset.zip` from the Hugging Face dataset `Cleanlab/cifar-10-subset` (MIT licence, 986,707 bytes, verified by SHA-256 before it is opened), and keeps its `frog` and `truck` folders. BYOD is optional and off by default. Expected BYOD input: one image, or a directory or `.zip` of class folders, `<class>/<image>`, with at least 2 classes and at least 2 images per class that are not copies of each other (more is better: 4 or more independent images per class also gives an unseen split). A `.tar` or other archive is not read; unpack it or re-zip it.",
         "- **Privacy:** Do not upload confidential or restricted data to a hosted notebook environment unless you are authorized to do so; uploaded inputs stay in this runtime and are not sent to any inference API. The default path uploads nothing.",
@@ -688,7 +696,9 @@ TEMPLATE = {
     ],
     "closing": (
         "## 14. Your turn — change one thing: freeze the backbone\n\n"
-        "Optional; **Predict → Change → Run → Observe → Explain**. It re-runs the fine-tune with only the new head trainable.\n\n"
+        "Optional; **Predict → Change → Run → Observe → Explain**. It re-runs the fine-tune with only the new head trainable. Comparing "
+        "two settings on the same held-out split uses that split as a validation set: the comparison is a look at this sample, not a "
+        "held-out estimate for the setting you prefer.\n\n"
         "1. **Predict:** with `FREEZE_BACKBONE = True`, will held-out accuracy go up, stay or go down against the default run, and will the "
         "fine-tune take more or less time? Write your guess next to row 0 of the Section 9 run history.\n"
         "2. **Change:** in Section 8 set `FREEZE_BACKBONE = True`. Change nothing else.\n"
@@ -705,7 +715,8 @@ TEMPLATE = {
         "## Interpretation and limits\n\n"
         "Start from your own run: the Section 9 table and its reading line, the Section 4 grouping summary and the Section 5 cross-split "
         "counts. Then read the reference answer.\n\n"
-        "<details><summary>Reference answer from the recorded runs</summary>The ImageNet head gave the sample thumbnails non-frog, non-truck top-1 labels at 32 px, yet its summed frog and truck classes separated the two labels, and it spread its scores thinly over blank and noise images. The archive's 400 images are 200 photographs, each held twice; grouped, they split 280 / 60 / 60 with no copy across splits. On the 60 held-out images the zero-shot mapping scored 58/60 [0.886, 0.991]; the untrained head 21/60, which moves with the seed between 0.217 and 0.667; the full fine-tune and the head-only fine-tune both 60/60 [0.940, 1.000] — every interval overlaps the zero-shot one, so this run measures **no reliable fine-tuning gain** over what the pretrained model already does. The unseen split scored 60/60 and the adapter reloaded to the same predictions within 1e-4 (local CPU run of this revision, 2026-10-08; the Kaggle T4 run of the earlier revision, whose split was not duplicate-aware, scored zero-shot 1.000 and fine-tuned 1.000 there).</details>\n\n"
+        "<details><summary>Reference answer from the recorded runs</summary>(Image-level overlap between these CIFAR-10 images and "
+        "ImageNet-1k was not checked; see **What the checkpoint may already have seen** at the top.) The ImageNet head gave the sample thumbnails non-frog, non-truck top-1 labels at 32 px, yet its summed frog and truck classes separated the two labels, and it spread its scores thinly over blank and noise images. The archive's 400 images are 200 photographs, each held twice; grouped, they split 280 / 60 / 60 with no copy across splits. On the 60 held-out images the zero-shot mapping scored 58/60 [0.886, 0.991]; the untrained head 21/60, which moves with the seed between 0.217 and 0.667; the full fine-tune and the head-only fine-tune both 60/60 [0.940, 1.000] — every interval overlaps the zero-shot one, so this run measures **no reliable fine-tuning gain** over what the pretrained model already does. The unseen split scored 60/60 and the adapter reloaded to the same predictions within 1e-4 (local CPU run of this revision, 2026-10-08; the Kaggle T4 run of the earlier revision, whose split was not duplicate-aware, scored zero-shot 1.000 and fine-tuned 1.000 there).</details>\n\n"
         "**What this notebook established, in this runtime.** The pinned `timm/maxvit_tiny_tf_224.in1k` snapshot was verified against a committed "
         "SHA-256 manifest before loading, and the pinned CIFAR-10 subset was verified against its recorded digest before it was read. Its "
         "duplicate and darkened copies were grouped, the split kept every group on one side, and the held-out and unseen splits were checked "
@@ -767,8 +778,9 @@ TEMPLATE = {
         "label; no weight changes.\n"
         "- **Re-heading:** replacing the 1000-class layer with a freshly initialised one for the task's classes.\n"
         "- **Duplicate group:** records that are pixel-identical or near duplicates of one photograph; a split keeps each group on one side.\n"
-        "- **Held-out split:** images never shown to the optimizer, never used to choose a setting, and with no copy in the training split; "
-        "the task evidence.\n"
+        "- **Held-out split:** images never shown to the optimizer and with no copy in the training split; on the default path it is "
+        "not used to choose a setting and is the task evidence. Section 14 and the **More experiments** compare settings on it, so "
+        "there it acts as a validation set.\n"
         "- **Accuracy / balanced accuracy:** the fraction answered correctly, and the mean of the per-class recalls.\n"
         "- **At ceiling:** a baseline already scores (nearly) every test image correctly, so no method can measurably beat it on that test set.\n"
         "- **Cross-entropy / AdamW:** the training loss for one label per image, and the optimizer that minimises it with decoupled weight decay.\n"
@@ -782,11 +794,12 @@ TEMPLATE = {
         "4. In Section 14, freezing the backbone changed held-out accuracy by ___ and the training time by ___.\n"
         "5. What I would need before claiming a fine-tuning gain: ___.\n\n"
         "## References\n\n"
-        "- Tu, Z., Talebi, H., Zhang, H., Yang, F., Milanfar, P., Bovik, A. and Li, Y. (2022). *MaxViT: Multi-Axis Vision Transformer.* ECCV 2022. [arXiv:2204.01697](https://arxiv.org/abs/2204.01697).\n"
-        "- Hugging Face checkpoint: [timm/maxvit_tiny_tf_224.in1k](https://huggingface.co/timm/maxvit_tiny_tf_224.in1k) — Apache-2.0; upstream code and weights: [google-research/maxvit](https://github.com/google-research/maxvit) — Apache-2.0; port: [huggingface/pytorch-image-models](https://github.com/huggingface/pytorch-image-models).\n"
-        "- Krizhevsky, A. (2009). *Learning Multiple Layers of Features from Tiny Images.* Technical report, University of Toronto — the CIFAR-10 dataset.\n"
-        "- Sample archive: [Cleanlab/cifar-10-subset](https://huggingface.co/datasets/Cleanlab/cifar-10-subset) — MIT licence.\n"
-        "- Repository model card: https://github.com/kurtvalcorza/maxvit-classification-pipeline/blob/main/MODEL_CARD.md\n"
-        "- [`kurtvalcorza/maxvit-classification-pipeline`](https://github.com/kurtvalcorza/maxvit-classification-pipeline) — source repository for this pipeline."
+        "References follow the IEEE style.\n\n"
+        "[1] Z. Tu, H. Talebi, H. Zhang, F. Yang, P. Milanfar, A. Bovik, and Y. Li, \"MaxViT: Multi-axis vision transformer,\" in *Proc. Eur. Conf. Comput. Vis. (ECCV)*, 2022. [Online]. Available: https://arxiv.org/abs/2204.01697\n\n"
+        "[2] Hugging Face, \"timm/maxvit_tiny_tf_224.in1k,\" model card (Apache-2.0); upstream code and weights google-research/maxvit (Apache-2.0); port huggingface/pytorch-image-models. [Online]. Available: https://huggingface.co/timm/maxvit_tiny_tf_224.in1k\n\n"
+        "[3] A. Krizhevsky, \"Learning multiple layers of features from tiny images,\" Univ. Toronto, Toronto, ON, Canada, Tech. Rep., 2009 (the CIFAR-10 dataset).\n\n"
+        "[4] Cleanlab, \"Cleanlab/cifar-10-subset,\" Hugging Face dataset (MIT licence), the sample archive. [Online]. Available: https://huggingface.co/datasets/Cleanlab/cifar-10-subset\n\n"
+        "[5] K. Valcorza, \"maxvit-classification-pipeline: model card,\" GitHub. [Online]. Available: https://github.com/kurtvalcorza/maxvit-classification-pipeline/blob/main/MODEL_CARD.md\n\n"
+        "[6] K. Valcorza, \"maxvit-classification-pipeline,\" source repository, GitHub. [Online]. Available: https://github.com/kurtvalcorza/maxvit-classification-pipeline"
     ),
 }

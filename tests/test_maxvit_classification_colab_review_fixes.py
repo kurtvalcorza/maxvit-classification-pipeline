@@ -399,7 +399,7 @@ def test_tier_c_guided_answers_hold_across_every_recorded_hosted_run():
     for gone in ("0.3367, 0.0265, 0.0056, 0.0021 and 0.0015", "`frog` 0.825 for the blank image", "not re-run here",
                  "local CPU run of this revision"):
         assert gone not in text, gone
-    for quoted in ("0.3347, 0.0250, 0.0048, 0.0019 and 0.0013 on 2026-10-25", "`train_seconds` was 32.8 and 33.6",
-                   "`frog` for the blank image (0.766 and 0.837)", "`truck` for noise (0.509 and 0.549)",
+    for quoted in ("0.3347, 0.0250, 0.0048, 0.0019 and 0.0013", "`train_seconds` was 32.8, 33.6 and 34.7",
+                   "`frog` for the blank image (0.766, 0.837 and 0.758)", "`truck` for noise (0.509, 0.549 and 0.649)",
                    "55 s and 33.6 s in the run of blob `59200cad`"):
         assert quoted in text, quoted

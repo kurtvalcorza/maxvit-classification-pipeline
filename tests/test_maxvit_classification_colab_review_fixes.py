@@ -381,7 +381,7 @@ def test_only_the_uv_install_and_router_cells_run_in_the_kernel():
     code = [_source(c) for c in nb["cells"] if c["cell_type"] == "code"]
     kernel = [c for c in code if "# dimer: kernel cell" in c]
     assert len(kernel) == 2 and "--require-hashes" in kernel[0] and "--managed-python" in kernel[0]
-    assert nb["metadata"]["dimer"]["notebook_spec"] == "2.2"
+    assert nb["metadata"]["dimer"]["notebook_spec"] == "2.5" and nb["metadata"]["dimer"]["notebook_kind"] == "TUTORIAL"
 
 
 def test_review_prose_is_gone_and_the_guided_layer_is_present():
@@ -391,3 +391,15 @@ def test_review_prose_is_gone_and_the_guided_layer_is_present():
     for needed in ("**Who this is for.**", "**How to use this notebook.**", "**Roadmap:**", "## Glossary", "## Troubleshooting", "## Conclusion (your notes)", "## 14. Your turn"):
         assert needed in markdown, needed
     assert markdown.count("**Predict before running:**") >= 7 and markdown.count("<details><summary>Check your reasoning</summary>") >= 9
+
+
+def test_tier_c_guided_answers_hold_across_every_recorded_hosted_run():
+    # Tier C prose-mismatch fix (2026-10-25): T4-run numbers name both Colab T4 runs; CPU-only figures stay labelled as CPU.
+    text = "\n".join("".join(c["source"]) for c in _notebook()["cells"] if c["cell_type"] == "markdown")
+    for gone in ("0.3367, 0.0265, 0.0056, 0.0021 and 0.0015", "`frog` 0.825 for the blank image", "not re-run here",
+                 "local CPU run of this revision"):
+        assert gone not in text, gone
+    for quoted in ("0.3347, 0.0250, 0.0048, 0.0019 and 0.0013", "`train_seconds` was 32.8, 33.6 and 34.7",
+                   "`frog` for the blank image (0.766, 0.837 and 0.758)", "`truck` for noise (0.509, 0.549 and 0.649)",
+                   "55 s and 33.6 s in the run of blob `59200cad`"):
+        assert quoted in text, quoted
